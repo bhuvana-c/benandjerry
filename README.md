@@ -2,9 +2,7 @@
 
 
 To import the json into db 
-cd cmd/import/
-go build
-./importjson -db "postgres://postgres:postgres@localhost:5433/ben-and-jerry?sslmode=disable" -file=icecream.json
+sh run-importdb.sh
 
 RUN Application using docker-compose.sh 
 ./docker-compose.sh
