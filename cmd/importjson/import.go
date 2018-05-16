@@ -61,7 +61,6 @@ func initDB(dbURL string, jsonFile string) error {
 	}
 
 	for _, iceCream := range iceCreams {
-		fmt.Println("sss", pq.Array(iceCream.Ingredients), iceCream.ProductID)
 		_, err = stmt.Exec(iceCream.Name, iceCream.ImageClosed, iceCream.ImageOpen, iceCream.Description, iceCream.Story, pq.Array(iceCream.SourcingValues), pq.Array(iceCream.Ingredients), iceCream.AllergyInfo, iceCream.DietaryCertifications, iceCream.ProductID)
 		if err != nil {
 			return errors.Wrap(err, "error while adding items fo bulk import")

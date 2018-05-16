@@ -1,0 +1,31 @@
+version: '2'
+services:
+  ben-and-jerry:
+    image: ben-and-jerry
+    environment:
+      - QWA_LOG_FORMAT=json
+      - QWA_LOG_LEVEL=info
+      - BAJ_LISTEN_PORT=8080
+      - BAJ_POSTGRES_URL=postgres://docker:docker@postgres:5432/qwastore?sslmode=disable
+    ports:
+      - "8080:8080"
+    container_name: ben-and-jerry-image
+    depends_on:
+      - postgres
+    links:
+      - postgres
+  postgres:
+    image: postgres:9.6.1-alpine
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=qwastore
+    ports:
+      - "5433:5432"
+    container_name: ben-and-jerry-app
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - postgres
+    command: postgres:5432 
+    container_name: ben-and-jerry-dependencies
