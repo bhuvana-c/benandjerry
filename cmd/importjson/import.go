@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"time"
 
@@ -27,17 +26,11 @@ type IceCream struct {
 }
 
 func initDB(dbURL string, jsonFile string) error {
-
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		errors.Wrap(err, "error while connecting to database")
 	}
 	defer db.Close()
-
-	//	absPath, err := filepath.Abs("../benandjerry/icecream.json")
-	//	if err != nil {
-	//		return errors.Wrap(err, "error while finding absoulte path")
-	//	}
 	data, err := ioutil.ReadFile(jsonFile)
 	if err != nil {
 		return errors.Wrap(err, "error while reading icecream.json")
@@ -48,8 +41,6 @@ func initDB(dbURL string, jsonFile string) error {
 	if err != nil {
 		return errors.Wrap(err, "error while decoding json data")
 	}
-	fmt.Println("======", len(iceCreams))
-	fmt.Println(time.Since(t).Seconds)
 	txn, err := db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "error while creating a transaction")
@@ -81,7 +72,8 @@ func initDB(dbURL string, jsonFile string) error {
 	if err != nil {
 		return errors.Wrap(err, "error while closing transaction")
 	}
-	fmt.Println("done")
+	log.Println("Imported in ", time.Since(t).Seconds)
+
 	return nil
 
 }
@@ -100,7 +92,6 @@ func main() {
 	if jsonFile == nil || *jsonFile == "" {
 		log.Fatalf("argument -file is missing")
 	}
-	fmt.Println(*dbURL, *jsonFile)
 	err := initDB(*dbURL, *jsonFile)
 	if err != nil {
 		log.Fatalf("error while importing data: %s", err)
