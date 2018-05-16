@@ -35,7 +35,6 @@ func (f fakeIceCreamStore) List() ([]*model.IceCream, error) {
 }
 
 func (f fakeIceCreamStore) Get(name string) (*model.IceCream, error) {
-	fmt.Println("=====s", name)
 
 	if f.GetByNameError != nil {
 		return nil, f.GetByNameError
@@ -43,7 +42,6 @@ func (f fakeIceCreamStore) Get(name string) (*model.IceCream, error) {
 
 	for _, iceCreamInfo := range f.Store {
 		if iceCreamInfo != nil && name == iceCreamInfo.Name {
-			fmt.Println("s", name)
 			return iceCreamInfo, nil
 		}
 	}
@@ -154,7 +152,7 @@ var getIceCreamTestCases = []struct {
 	expectedStatusCode   int
 }{
 	{
-		"Getting a specific info",
+		"Getting a specific info (which exists),returns info",
 		url.Values{"name": []string{"Sample1"}},
 		&fakeIceCreamStore{Store: sampleList},
 		sampleList[0],
@@ -162,7 +160,7 @@ var getIceCreamTestCases = []struct {
 		http.StatusOK,
 	},
 	{
-		"Getting a specific info",
+		"Getting a non-existing info,returns error",
 		url.Values{"name": []string{"random"}},
 		&fakeIceCreamStore{Store: sampleList},
 		nil,
@@ -177,11 +175,8 @@ func Test_GetIceCream_Returns_IceCream_For_Given_Criteria(t *testing.T) {
 	for _, testcase := range getIceCreamTestCases {
 		rr := httptest.NewRecorder()
 		iceCreamHandler := &IceCreamHandler{IceCreamStore: testcase.fakeIceCreamStore}
-		path := fmt.Sprintf("/icecreams/show/%s", testcase.params)
-
 		params := httprouter.Params{httprouter.Param{"name", testcase.params.Get("name")}}
-
-		handlerErr := iceCreamHandler.Get(rr, fakeHttpRequest("GET", path, nil), params)
+		handlerErr := iceCreamHandler.Get(rr, fakeHttpRequest("GET", fmt.Sprintf("/icecreams/show/%s", testcase.params), nil), params)
 		t.Logf("%s", testcase.description)
 
 		if testcase.expectedHandlerErr != nil {
@@ -267,8 +262,7 @@ func Test_createNewInfoTestcases_creates_a_new_IceCream_Info(t *testing.T) {
 	for _, testcase := range createNewInfoTestcases {
 		rr := httptest.NewRecorder()
 		iceCreamHandler := &IceCreamHandler{IceCreamStore: testcase.fakeIceCreamStore}
-		path := fmt.Sprintf("/icecreams/create")
-		handlerErr := iceCreamHandler.Create(rr, fakeHttpRequest("POST", path, newSampleIceCreamJSON(testcase.params.Get("name"))), nil)
+		handlerErr := iceCreamHandler.Create(rr, fakeHttpRequest("POST", fmt.Sprintf("/icecreams/create"), newSampleIceCreamJSON(testcase.params.Get("name"))), nil)
 		t.Logf("%s", testcase.description)
 
 		if testcase.expectedHandlerErr != nil {
@@ -303,13 +297,6 @@ var deleteTestcases = []struct {
 		nil,
 		http.StatusOK,
 	},
-	{
-		"delete the existing one",
-		url.Values{"name": []string{"random"}},
-		&fakeIceCreamStore{Store: sampleList},
-		httputil.NewNotFoundError(fmt.Sprintf("'%s' not found", "random"), errors.New("not_found")),
-		http.StatusOK,
-	},
 }
 
 func Test_delete(t *testing.T) {
@@ -318,10 +305,8 @@ func Test_delete(t *testing.T) {
 	for _, testcase := range deleteTestcases {
 		rr := httptest.NewRecorder()
 		iceCreamHandler := &IceCreamHandler{IceCreamStore: testcase.fakeIceCreamStore}
-		path := fmt.Sprintf("/icecreams/delete")
 		params := httprouter.Params{httprouter.Param{"name", testcase.params.Get("name")}}
-
-		handlerErr := iceCreamHandler.Delete(rr, fakeHttpRequest("POST", path, newSampleIceCreamJSON(testcase.params.Get("name"))), params)
+		handlerErr := iceCreamHandler.Delete(rr, fakeHttpRequest("POST", fmt.Sprintf("/icecreams/delete"), newSampleIceCreamJSON(testcase.params.Get("name"))), params)
 		t.Logf("%s", testcase.description)
 
 		if testcase.expectedHandlerErr != nil {
