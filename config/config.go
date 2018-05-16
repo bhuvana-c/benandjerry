@@ -58,10 +58,11 @@ func (pgConn *PgConn) Decode(dbUrl string) error {
 }
 
 type Config struct {
-	LogLevel    string `envconfig:"LOG_LEVEL"`
-	LogFormat   string `envconfig:"LOG_FORMAT"`
-	ListenPort  uint16 `envconfig:"LISTEN_PORT" required:"true"`
-	PostgresURL PgConn `envconfig:"POSTGRES_URL" required:"true"`
+	LogLevel             string `envconfig:"LOG_LEVEL"`
+	LogFormat            string `envconfig:"LOG_FORMAT"`
+	ListenPort           uint16 `envconfig:"LISTEN_PORT" required:"true"`
+	PostgresConn         PgConn `envconfig:"POSTGRES_URL" required:"true"`
+	MigrationScriptsPath string `envconfig:"MIGRATION_SCRIPTS_PATH" required:"true"`
 }
 
 func Load() (*Config, error) {

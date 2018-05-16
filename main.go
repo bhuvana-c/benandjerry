@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"path/filepath"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -35,15 +34,14 @@ func main() {
 	setupLog(config)
 	log.Infof("%s built on %s from commit %s", serviceName, buildTimestamp, commitID)
 
-	absPath, _ := filepath.Abs("../benandjerry/db/migrations")
-	err = db.RunMigrateScripts(&config.PostgresURL, absPath)
+	err = db.RunMigrateScripts(&config.PostgresConn, config.MigrationScriptsPath)
 	failOnError(err, "error while running migration scripts")
 
 	router := httprouter.New()
 	indexHandler := &handler.IndexHandler{}
 	indexHandler.AddRoutes(router)
 
-	db, err := sql.Open("postgres", config.PostgresURL.GetURL())
+	db, err := sql.Open("postgres", config.PostgresConn.GetURL())
 
 	failOnError(err, "error while connecting to database")
 	defer db.Close()
